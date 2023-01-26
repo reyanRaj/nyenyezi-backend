@@ -5,7 +5,11 @@ const connectDB = require("./config/connectDb");
 
 const app = express();
 
-const whitelist = ["http://127.0.0.1:5173"];
+const whitelist = [
+  "http://127.0.0.1:5173",
+  "http://nyenyezi.hindizy.online",
+  "https://nyenyezi.hindizy.online",
+];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
