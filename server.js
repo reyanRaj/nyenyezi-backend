@@ -12,7 +12,7 @@ var corsOptions = {
 // setting up the environmental variables
 dotenv.config({ path: "./config/config.env" });
 
-app.use("*", cors());
+app.use(cors(corsOptions));
 
 // parse requests of content-type - application/json
 app.use(express.json());
