@@ -45,6 +45,7 @@ require("./routes/user")(app);
 require("./routes/costumer")(app);
 require("./routes/product")(app);
 require("./routes/transaction")(app);
+require("./routes/branch")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

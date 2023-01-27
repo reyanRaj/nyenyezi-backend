@@ -27,6 +27,7 @@ exports.addTransactions = async (req, res) => {
         quantity: transaction.quantity,
         total: transaction.total,
         user: user._id,
+        date: req.body.date,
       });
 
       await trans.save();
@@ -43,7 +44,13 @@ exports.addTransactions = async (req, res) => {
 
 exports.getAllTransaction = async (req, res) => {
   try {
-    let transactions = await Transaction.find({})
+    let gteDate = moment(req.query.date) || moment();
+    let ltDate = moment(gteDate).add(1, "days");
+    let user = await User.findById(req.userId);
+    let transactions = await Transaction.find({
+      date: { $gte: gteDate, $lt: ltDate },
+      user: user._id,
+    })
       .populate("customer", "-__v")
       .populate("product", "-__v");
 
@@ -57,6 +64,25 @@ exports.getAllTransaction = async (req, res) => {
   }
 };
 
+exports.getAllUserTransactions = async (req, res) => {
+  try {
+    let gteDate = moment(req.query.date) || moment();
+    let ltDate = moment(gteDate).add(1, "days");
+    let transactions = await Transaction.find({
+      date: { $gte: gteDate, $lt: ltDate },
+    })
+      .populate("customer", "-__v")
+      .populate("product", "-__v");
+
+    return res.status(200).send({
+      transactions: transactions,
+      message: "Successfully fetched transactions.",
+    });
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server Error" });
+    console.error(error);
+  }
+};
 exports.deleteTransaction = async (req, res) => {
   try {
     let transaction = await Transaction.findOneAndDelete({
@@ -105,8 +131,12 @@ exports.updateTransaction = async (req, res) => {
 exports.generateCSV = async (req, res) => {
   try {
     let user = await User.findById(req.userId);
-
-    let transactions = await Transaction.find({})
+    let gteDate = moment(req.query.date) || moment();
+    let ltDate = moment(gteDate).add(1, "days");
+    let transactions = await Transaction.find({
+      date: { $gte: gteDate, $lt: ltDate },
+      user: user._id,
+    })
       .populate("customer", "-__v")
       .populate("product", "-__v");
 
@@ -158,8 +188,12 @@ exports.generateCSV = async (req, res) => {
 exports.mailCSV = async (req, res) => {
   try {
     let user = await User.findById(req.userId);
-
-    let transactions = await Transaction.find({})
+    let gteDate = moment(req.query.date) || moment();
+    let ltDate = moment(gteDate).add(1, "days");
+    let transactions = await Transaction.find({
+      date: { $lt: ltDate, $gte: gteDate },
+      user: user._id,
+    })
       .populate("customer", "-__v")
       .populate("product", "-__v");
 
@@ -185,6 +219,146 @@ exports.mailCSV = async (req, res) => {
         transaction.customer.email,
         user.username,
         user.email,
+        transaction.product.name,
+        transaction.quantity,
+        transaction.total,
+      ];
+    });
+    let location = path.join(__dirname, "..", "public", req.userId + ".csv");
+    const ws = fs.createWriteStream(location);
+    fastcsv
+      .write(data, { headers: true })
+      .on("finish", function () {
+        var transporter = nodemailer.createTransport({
+          host: "smtp.hostinger.com",
+          port: 465,
+          secure: true, // true for 465, false for other ports
+          auth: {
+            user: "alifarhad@hindizy.online", // your domain email address
+            pass: "Alifarhad@123", // your password
+          },
+        });
+        console.log("generated csv");
+        let mailOptions = {
+          from: '"Nyenyezi" <alifarhad@hindizy.online>',
+          to: req.body.email,
+          subject: "Here is your Transactions Receipt",
+          html: "We have attached your transaction Receipt with this mail. Check it out.",
+          attachments: [
+            {
+              filename: "Transaction.csv",
+              path: location,
+            },
+          ],
+        };
+
+        transporter.sendMail(mailOptions, function (err, info) {
+          if (err) {
+            console.error(err);
+            return res.status(500).send({ message: "Internal Server Error" });
+          }
+
+          return res
+            .status(200)
+            .send({ message: "Successfully sent the mail!" });
+        });
+      })
+      .pipe(ws);
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server Error" });
+    console.error(error);
+  }
+};
+
+exports.generateCSVAll = async (req, res) => {
+  try {
+    let gteDate = moment(req.query.date) || moment();
+    let ltDate = moment(gteDate).add(1, "days");
+    let transactions = await Transaction.find({
+      date: { $gte: gteDate, $lt: ltDate },
+    })
+      .populate("customer", "-__v")
+      .populate("product", "-__v")
+      .populate("user", "-__v");
+
+    let data = [];
+
+    data[0] = [
+      "Date",
+      "ID",
+      "Customer Name",
+      "Customer Email",
+      "User Name",
+      "User Email",
+      "Product",
+      "Quantity",
+      "Total Price",
+    ];
+
+    transactions.forEach((transaction, index) => {
+      data[index + 1] = [
+        moment(transaction.date).format("YYYY-MM-DD"),
+        transaction._id,
+        transaction.customer.username,
+        transaction.customer.email,
+        transaction.user.username,
+        transaction.user.email,
+        transaction.product.name,
+        transaction.quantity,
+        transaction.total,
+      ];
+    });
+    let location = path.join(__dirname, "..", "public", req.userId + ".csv");
+    const ws = fs.createWriteStream(location);
+    fastcsv
+      .write(data, { headers: true })
+      .on("finish", function () {
+        return res.status(200).send({
+          location: location,
+          url: "public/" + req.userId + ".csv",
+          message: "Successfully generated CSV",
+        });
+      })
+      .pipe(ws);
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server Error" });
+    console.error(error);
+  }
+};
+
+exports.mailCSVAll = async (req, res) => {
+  try {
+    let gteDate = moment(req.query.date) || moment();
+    let ltDate = moment(gteDate).add(1, "days");
+    let transactions = await Transaction.find({
+      date: { $lt: ltDate, $gte: gteDate },
+    })
+      .populate("customer", "-__v")
+      .populate("product", "-__v")
+      .poupulate("user", "-__v");
+
+    let data = [];
+
+    data[0] = [
+      "Date",
+      "ID",
+      "Customer Name",
+      "Customer Email",
+      "User Name",
+      "User Email",
+      "Product",
+      "Quantity",
+      "Total Price",
+    ];
+
+    transactions.forEach((transaction, index) => {
+      data[index + 1] = [
+        moment(transaction.date).format("YYYY-MM-DD"),
+        transaction._id,
+        transaction.customer.username,
+        transaction.customer.email,
+        transaction.user.username,
+        transaction.user.email,
         transaction.product.name,
         transaction.quantity,
         transaction.total,

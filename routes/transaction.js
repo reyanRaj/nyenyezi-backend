@@ -24,6 +24,12 @@ module.exports = function (app) {
     controller.getAllTransaction
   );
 
+  app.get(
+    "/api/admin/getAllUserTransactions",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.getAllUserTransactions
+  );
+
   app.delete(
     "/api/user/deleteTransaction/:id",
     [authJwt.verifyToken],
@@ -43,4 +49,16 @@ module.exports = function (app) {
   );
 
   app.post("/api/user/mailCSV", [authJwt.verifyToken], controller.mailCSV);
+
+  app.get(
+    "/api/admin/generateCSVAll",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.generateCSVAll
+  );
+
+  app.post(
+    "/api/admin/mailCSVAll",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.mailCSVAll
+  );
 };

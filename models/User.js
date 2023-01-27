@@ -12,6 +12,10 @@ const User = mongoose.model(
         ref: "Role",
       },
     ],
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+    },
   })
 );
 
