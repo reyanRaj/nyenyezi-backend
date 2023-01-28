@@ -33,9 +33,7 @@ exports.addTransactions = async (req, res) => {
       await trans.save();
     });
 
-    return res
-      .status(201)
-      .send({ message: "Your trasaction is successfully added!" });
+    return res.status(201).send({ message: "Saved successfully" });
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error" });
     console.error(error);
@@ -130,7 +128,7 @@ exports.updateTransaction = async (req, res) => {
 
 exports.generateCSV = async (req, res) => {
   try {
-    let user = await User.findById(req.userId);
+    let user = await User.findById(req.userId).populate("branch");
     let gteDate = moment(req.query.date) || moment();
     let ltDate = moment(gteDate).add(1, "days");
     let transactions = await Transaction.find({
@@ -149,6 +147,7 @@ exports.generateCSV = async (req, res) => {
       "Customer Email",
       "User Name",
       "User Email",
+      "Branch",
       "Product",
       "Quantity",
       "Total Price",
@@ -162,6 +161,7 @@ exports.generateCSV = async (req, res) => {
         transaction.customer.email,
         user.username,
         user.email,
+        user.branch.name,
         transaction.product.name,
         transaction.quantity,
         transaction.total,
@@ -187,7 +187,7 @@ exports.generateCSV = async (req, res) => {
 
 exports.mailCSV = async (req, res) => {
   try {
-    let user = await User.findById(req.userId);
+    let user = await User.findById(req.userId).populate("branch");
     let gteDate = moment(req.query.date) || moment();
     let ltDate = moment(gteDate).add(1, "days");
     let transactions = await Transaction.find({
@@ -206,6 +206,7 @@ exports.mailCSV = async (req, res) => {
       "Customer Email",
       "User Name",
       "User Email",
+      "Branch",
       "Product",
       "Quantity",
       "Total Price",
@@ -219,6 +220,7 @@ exports.mailCSV = async (req, res) => {
         transaction.customer.email,
         user.username,
         user.email,
+        user.branch.name,
         transaction.product.name,
         transaction.quantity,
         transaction.total,
@@ -279,10 +281,13 @@ exports.generateCSVAll = async (req, res) => {
     })
       .populate("customer", "-__v")
       .populate("product", "-__v")
-      .populate("user", "-__v");
+      .populate({
+        path: "user",
+        populate: { path: "branch", model: "Branch" },
+      });
 
     let data = [];
-
+    console.log(transactions);
     data[0] = [
       "Date",
       "ID",
@@ -290,6 +295,7 @@ exports.generateCSVAll = async (req, res) => {
       "Customer Email",
       "User Name",
       "User Email",
+      "Branch",
       "Product",
       "Quantity",
       "Total Price",
@@ -303,6 +309,7 @@ exports.generateCSVAll = async (req, res) => {
         transaction.customer.email,
         transaction.user.username,
         transaction.user.email,
+        transaction.user.branch.name,
         transaction.product.name,
         transaction.quantity,
         transaction.total,
@@ -335,7 +342,11 @@ exports.mailCSVAll = async (req, res) => {
     })
       .populate("customer", "-__v")
       .populate("product", "-__v")
-      .poupulate("user", "-__v");
+      .poupulate("user", "-__v")
+      .populate({
+        path: "user",
+        populate: { path: "branch", model: "Branch" },
+      });
 
     let data = [];
 
@@ -346,6 +357,7 @@ exports.mailCSVAll = async (req, res) => {
       "Customer Email",
       "User Name",
       "User Email",
+      "Branch",
       "Product",
       "Quantity",
       "Total Price",
@@ -359,6 +371,7 @@ exports.mailCSVAll = async (req, res) => {
         transaction.customer.email,
         transaction.user.username,
         transaction.user.email,
+        transaction.user.branch.name,
         transaction.product.name,
         transaction.quantity,
         transaction.total,

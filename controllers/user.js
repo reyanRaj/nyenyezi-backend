@@ -44,9 +44,7 @@ exports.addUser = async (req, res) => {
 
     await newUser.save();
 
-    return res
-      .status(201)
-      .send({ message: "User was registered successfully!" });
+    return res.status(201).send({ message: "Saved successfully" });
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error" });
     console.error(error);

@@ -10,7 +10,7 @@ exports.addBranch = async (req, res) => {
     let branch = new Branch({ name: req.body.branchName });
     await branch.save();
 
-    return res.status(201).send({ message: "Successfully added new branch!" });
+    return res.status(201).send({ message: "Saved successfully" });
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error" });
     console.error(error);

@@ -1,2 +1,5 @@
-Date,ID,Customer Name,Customer Email,User Name,User Email,Product,Quantity,Total Price
-2023-01-15,63d3b0320237de857b31dd21,ReyanRaja,reyanraj23412@gmail.com,Saksham Kumar,sks@gmail.com,Samsung S23 Pro+,1,4642.3084
+Date,ID,Customer Name,Customer Email,User Name,User Email,Branch,Product,Quantity,Total Price
+2023-01-27,63d4021e7ebe94316d3ce2cf,ReyanRaja,reyanraj23412@gmail.com,Reyan Raju,reyanraj234234@gmail.com,Lumwana,Diesel,25,766.76
+2023-01-27,63d4021e7ebe94316d3ce2d1,ReyanRaja,reyanraj23412@gmail.com,Reyan Raju,reyanraj234234@gmail.com,Lumwana,Diesel,10,306.70400000000006
+2023-01-27,63d4021e7ebe94316d3ce2d5,ReyanRaja,reyanraj23412@gmail.com,Reyan Raju,reyanraj234234@gmail.com,Lumwana,Petrol,30,852.252
+2023-01-27,63d4021e7ebe94316d3ce2d3,ReyanRaja,reyanraj23412@gmail.com,Reyan Raju,reyanraj234234@gmail.com,Lumwana,Petrol,20,568.168

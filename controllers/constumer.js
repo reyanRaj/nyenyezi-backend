@@ -13,7 +13,7 @@ exports.addCostumer = async (req, res) => {
     });
     await constumer.save();
 
-    return res.status(201).send({ message: "Succesfully added." });
+    return res.status(201).send({ message: "Saved successfully" });
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error" });
     console.error(error);
