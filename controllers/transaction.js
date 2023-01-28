@@ -118,7 +118,7 @@ exports.updateTransaction = async (req, res) => {
     }
 
     return res.status(200).send({
-      message: `Transaction succesfully updated transaction: id ${transaction._id}!`,
+      message: `Transaction succesfully updated`,
     });
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error" });
